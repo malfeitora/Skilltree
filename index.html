@@ -174,8 +174,7 @@
       circle.addEventListener('click', () => {
         if (node.level < node.maxLevel && node.unlocked) {
           currentSkill = node;
-          wordInput.style.visibility = 'visible';
-          wordField.focus();
+          showUparButton(node);
         }
       });
 
@@ -188,21 +187,16 @@
       return words[index % words.length];
     }
 
-    // Submeter a palavra
-    submitWord.addEventListener('click', () => {
-      const word = wordField.value;
-      if (word === currentSkill.word) {
-        currentSkill.level++;
-        if (currentSkill.level === currentSkill.maxLevel) {
-          currentSkill.unlocked = true;
-        }
-        wordInput.style.visibility = 'hidden';
-        alert(`Habilidade ${currentSkill.name} upada com sucesso!`);
-      } else {
-        alert('Palavra incorreta. Tente novamente!');
-      }
-      wordField.value = '';
-    });
+    // Mostrar o botão de Upar
+    function showUparButton(node) {
+      const button = document.createElement('button');
+      button.innerText = "Upar";
+      button.className = 'button active';
+      button.onclick = function() {
+        startWordGame();
+      };
+      svg.appendChild(button);
+    }
 
     // Iniciar o jogo de palavras
     function startWordGame() {
