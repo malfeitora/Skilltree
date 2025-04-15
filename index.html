@@ -1,74 +1,77 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html><html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Skill Tree - Elden Ring Incantations</title>
+  <title>Árvore de Habilidades - Elden Ring</title>
   <style>
     body {
-      background-color: #0f0f0f;
-      color: #fff;
-      font-family: 'Segoe UI', sans-serif;
+      background-color: #0d0d0d;
+      color: white;
+      font-family: Arial, sans-serif;
       display: flex;
       justify-content: center;
-      padding: 2rem;
+      align-items: center;
+      flex-direction: column;
+      padding: 20px;
     }
-    .tree {
+    .skill-tree {
       display: grid;
-      grid-template-columns: repeat(6, 120px);
-      gap: 40px;
-      position: relative;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 20px;
+      width: 100%;
+      max-width: 1000px;
     }
     .skill {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      position: relative;
-      border: 1px solid gold;
-      padding: 10px;
+      background-color: #1a1a1a;
+      border: 2px solid gold;
       border-radius: 10px;
-      background-color: #1c1c1c;
+      text-align: center;
+      padding: 10px;
+      transition: transform 0.2s;
+    }
+    .skill:hover {
+      transform: scale(1.05);
       cursor: pointer;
     }
     .skill img {
       width: 64px;
       height: 64px;
-      border: 2px solid gold;
-      border-radius: 8px;
-      background-color: #222;
-    }
-    .skill span {
-      margin-top: 0.5rem;
-      font-size: 0.9rem;
+      border-radius: 6px;
+      margin-bottom: 8px;
     }
     .attributes {
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       margin: 5px 0;
     }
     .upa-btn {
-      margin-top: 5px;
-      background: gold;
+      background-color: gold;
+      color: black;
       border: none;
-      padding: 4px 8px;
+      padding: 5px 10px;
+      border-radius: 5px;
       font-weight: bold;
-      border-radius: 4px;
       cursor: pointer;
+      margin-top: 5px;
       display: none;
     }
-    #challenge-modal {
+    #challenge-box {
+      background: #111;
+      border: 2px solid gold;
+      padding: 20px;
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: #111;
-      border: 2px solid gold;
-      padding: 20px;
       display: none;
-      z-index: 1000;
+      z-index: 10;
     }
-    #challenge-modal input {
-      margin-top: 10px;
+    #challenge-box input {
       width: 100%;
+      margin-top: 10px;
+    }
+    #timer {
+      color: gold;
+      margin-top: 10px;
     }
     #overlay {
       position: fixed;
@@ -76,124 +79,108 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.7);
+      background-color: rgba(0,0,0,0.7);
+      z-index: 5;
       display: none;
-      z-index: 999;
-    }
-    #timer {
-      font-size: 1rem;
-      color: gold;
-      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <div id="overlay"></div>
-  <div id="challenge-modal">
+  <div class="skill-tree" id="tree"></div>  <div id="overlay"></div>
+  <div id="challenge-box">
     <p id="challenge-text">Complete a frase:</p>
-    <input type="text" id="challenge-input" placeholder="Digite a frase...">
+    <input type="text" id="challenge-input">
     <div id="timer"></div>
-    <button onclick="checkChallenge()">Enviar</button>
-  </div>
-  <div class="tree" id="skill-tree"></div>  <script>
-    const skills = [
-      { name: 'Heal', src: 'heal_incantation_elden_ring_wiki_guide_200px (1).png' },
-      { name: 'Urgent Heal', src: 'urgent_heal_incantation_elden_ring_wiki_guide_200px (1).png' },
-      { name: "Lord's Heal", src: 'lords_heal_incantation_elden_ring_wiki_guide_200px (1).png' },
-      { name: "Lord's Aid", src: "lord's_aid_incantation_elden_ring_wiki_guide_200px (1).png" },
-      { name: "Cure Poison", src: 'cure_poison_elden_ring_wiki_guide_200px (1).png' },
-      { name: 'Flame Fortification', src: 'flame_fortification_incantation_elden_ring_wiki_guide_200px (1).png' },
-      { name: 'Magic Fortification', src: 'magic_fortification_incantation_elden_ring_wiki_guide_200px (1).png' },
-      { name: "Lord's Divine Fort.", src: 'lords_divine_fortification_incantation_elden_ring_wiki_guide_200px (1).png' },
-      { name: 'Lightning Fort.', src: 'lightning_fortification_incantation_elden_ring_wiki_guide_200px (1).png' },
-      { name: 'Divine Fort.', src: 'divine_fortification_incantation_elden_ring_wiki_guide_200px (1).png' },
-      { name: 'Golden Lightning', src: 'golden_lightning_fortification_incantation_elden_ring_wiki_guide_200px (1).png' },
-      { name: 'Golden Vow', src: 'golden_vow_incantation_elden_ring_wiki_guide_200px (1).png' },
-      { name: 'Wrath of Gold', src: 'wrath of gold_incantation_elden_ring_wiki_guide_200px (1).png' },
-      { name: 'Barrier of Gold', src: 'barrier_of_gold_incantation_elden_ring_wiki_guide_200px (1).png' },
-      { name: 'Erdtree Prot.', src: 'protection_of_the erdtree_incantation_elden_ring_wiki_guide_200px (1).png' },
-      { name: 'Erdtree Heal', src: 'erdtree_heal_incantation_elden_ring_wiki_guide_200px (1).png' },
-      { name: 'Blessing Erdtree', src: 'blessing_of_the_erdtree_incantation_elden_ring_wiki_guide_200px (1).png' },
-      { name: "Blessing's Boon", src: 'blessings_boon_incantation_elden_ring_wiki_guide_200px (1).webp' },
-      { name: "Radagon's Rings", src: 'radagons_rings_incantation_elden_ring_wiki_guide_200px (1).png' },
-      { name: 'Litany Death', src: 'litany_of_proper_death_incantation_elden_ring_wiki_guide_200px (1).png' },
-      { name: 'Order Healing', src: 'order_healing_incantation_elden_ring_wiki_guide_200px (1).png' },
-      { name: 'Regression', src: 'law_of_regression_incantation_elden_ring_wiki_guide_200px (1).png' },
-      { name: 'Causality', src: 'law_of_causality_incantation_elden_ring.png' }
+    <button onclick="submitChallenge()">Enviar</button>
+  </div>  <script>
+    const habilidades = [
+      'heal_incantation_elden_ring_wiki_guide_200px (1).png',
+      'urgent_heal_incantation_elden_ring_wiki_guide_200px (1).png',
+      'lords_heal_incantation_elden_ring_wiki_guide_200px (1).png',
+      "lord's_aid_incantation_elden_ring_wiki_guide_200px (1).png",
+      'cure_poison_elden_ring_wiki_guide_200px (1).png'
     ];
 
-    const tree = document.getElementById('skill-tree');
+    const frases = [
+      'O cavaleiro caminhava quando...',
+      'Na luz dourada ele encontrou...',
+      'A fé dele era tão forte que...',
+      'Mesmo ferido, ele levantou e...',
+      'A benção do Erdtree disse...'
+    ];
 
-    skills.forEach(skill => {
+    let timer;
+    let timeLeft = 300;
+    let currentPhrase = '';
+
+    const tree = document.getElementById('tree');
+
+    habilidades.forEach((src, index) => {
       const div = document.createElement('div');
       div.className = 'skill';
-      div.innerHTML = `
-        <img src="${skill.src}" alt="${skill.name}">
-        <span>${skill.name}</span>
-        <div class="attributes">HP +10<br>Fé +1<br>Resistência +2</div>
-        <button class="upa-btn">Upa</button>
-      `;
 
-      const upaBtn = div.querySelector('.upa-btn');
-      upaBtn.onclick = () => startChallenge(skill.name);
-      div.onclick = () => {
-        upaBtn.style.display = 'inline-block';
+      const img = document.createElement('img');
+      img.src = src;
+      img.alt = 'Skill Icon';
+
+      const attr = document.createElement('div');
+      attr.className = 'attributes';
+      attr.innerHTML = 'HP +10<br>Fé +1<br>Resistência +2';
+
+      const btn = document.createElement('button');
+      btn.className = 'upa-btn';
+      btn.textContent = 'Upa';
+      btn.onclick = () => iniciarDesafio();
+
+      img.onclick = () => {
+        btn.style.display = 'inline-block';
       };
 
+      div.appendChild(img);
+      div.appendChild(attr);
+      div.appendChild(btn);
       tree.appendChild(div);
     });
 
-    const phrases = [
-      "O céu azul é...",
-      "A árvore da vida...",
-      "Na escuridão eu...",
-      "Com coragem, ele...",
-      "A fé guia..."
-    ];
-
-    let currentChallenge = '';
-    let timer;
-    let timeLeft = 300;
-
-    function startChallenge(skillName) {
-      const random = phrases[Math.floor(Math.random() * phrases.length)];
-      currentChallenge = random;
-      document.getElementById('challenge-text').innerText = `Complete a frase: "${random}"`;
-      document.getElementById('overlay').style.display = 'block';
-      document.getElementById('challenge-modal').style.display = 'block';
+    function iniciarDesafio() {
+      const aleatoria = frases[Math.floor(Math.random() * frases.length)];
+      currentPhrase = aleatoria;
+      document.getElementById('challenge-text').innerText = `Complete a frase: "${aleatoria}"`;
       document.getElementById('challenge-input').value = '';
+      document.getElementById('challenge-box').style.display = 'block';
+      document.getElementById('overlay').style.display = 'block';
       timeLeft = 300;
-      updateTimer();
+      atualizarTimer();
       timer = setInterval(() => {
         timeLeft--;
-        updateTimer();
+        atualizarTimer();
         if (timeLeft <= 0) {
           clearInterval(timer);
-          alert("Tempo esgotado!");
-          closeChallenge();
+          alert('Tempo esgotado!');
+          fecharDesafio();
         }
       }, 1000);
     }
 
-    function updateTimer() {
-      const minutes = Math.floor(timeLeft / 60);
-      const seconds = timeLeft % 60;
-      document.getElementById('timer').innerText = `Tempo restante: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    function atualizarTimer() {
+      const min = Math.floor(timeLeft / 60);
+      const sec = timeLeft % 60;
+      document.getElementById('timer').innerText = `Tempo: ${min}:${sec < 10 ? '0' : ''}${sec}`;
     }
 
-    function checkChallenge() {
+    function submitChallenge() {
       const input = document.getElementById('challenge-input').value;
-      if (input.length > currentChallenge.length + 5) {
-        alert('Parabéns! Você completou a frase.');
+      if (input.length > currentPhrase.length + 5) {
+        alert('Desafio concluído!');
       } else {
-        alert('Frase incompleta! Tente de novo.');
+        alert('Frase muito curta, tente novamente!');
       }
-      closeChallenge();
+      fecharDesafio();
     }
 
-    function closeChallenge() {
+    function fecharDesafio() {
       clearInterval(timer);
-      document.getElementById('challenge-modal').style.display = 'none';
+      document.getElementById('challenge-box').style.display = 'none';
       document.getElementById('overlay').style.display = 'none';
     }
   </script></body>
