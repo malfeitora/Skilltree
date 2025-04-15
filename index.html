@@ -14,7 +14,7 @@
     }
     .tree {
       display: grid;
-      grid-template-columns: repeat(6, 100px);
+      grid-template-columns: repeat(6, 120px);
       gap: 40px;
       position: relative;
     }
@@ -24,6 +24,10 @@
       align-items: center;
       text-align: center;
       position: relative;
+      border: 1px solid gold;
+      padding: 10px;
+      border-radius: 10px;
+      background-color: #1c1c1c;
     }
     .skill img {
       width: 64px;
@@ -36,38 +40,124 @@
       margin-top: 0.5rem;
       font-size: 0.9rem;
     }
-    .connector {
-      position: absolute;
-      width: 2px;
+    .attributes {
+      font-size: 0.75rem;
+      margin: 5px 0;
+    }
+    .upa-btn {
+      margin-top: 5px;
       background: gold;
+      border: none;
+      padding: 4px 8px;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #challenge-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #111;
+      border: 2px solid gold;
+      padding: 20px;
+      display: none;
+      z-index: 1000;
+    }
+    #challenge-modal input {
+      margin-top: 10px;
+      width: 100%;
+    }
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      z-index: 999;
     }
   </style>
 </head>
 <body>
-  <div class="tree">
-    <div class="skill"><img src="heal_incantation_elden_ring_wiki_guide_200px (1).png" alt="Heal"><span>Heal</span></div>
-    <div class="skill"><img src="urgent_heal_incantation_elden_ring_wiki_guide_200px (1).png" alt="Urgent Heal"><span>Urgent Heal</span></div>
-    <div class="skill"><img src="lords_heal_incantation_elden_ring_wiki_guide_200px (1).png" alt="Lord's Heal"><span>Lord's Heal</span></div>
-    <div class="skill"><img src="lord's_aid_incantation_elden_ring_wiki_guide_200px (1).png" alt="Lord's Aid"><span>Lord's Aid</span></div>
-    <div class="skill"><img src="cure_poison_elden_ring_wiki_guide_200px (1).png" alt="Cure Poison"><span>Cure Poison</span></div>
-    <div class="skill"><img src="flame_fortification_incantation_elden_ring_wiki_guide_200px (1).png" alt="Flame Fortification"><span>Flame Fortification</span></div>
-    <div class="skill"><img src="magic_fortification_incantation_elden_ring_wiki_guide_200px (1).png" alt="Magic Fortification"><span>Magic Fortification</span></div>
-    <div class="skill"><img src="lords_divine_fortification_incantation_elden_ring_wiki_guide_200px (1).png" alt="Lord's Divine Fortification"><span>Lord's Divine Fort.</span></div>
-    <div class="skill"><img src="lightning_fortification_incantation_elden_ring_wiki_guide_200px (1).png" alt="Lightning Fortification"><span>Lightning Fort.</span></div>
-    <div class="skill"><img src="divine_fortification_incantation_elden_ring_wiki_guide_200px (1).png" alt="Divine Fortification"><span>Divine Fort.</span></div>
-    <div class="skill"><img src="golden_lightning_fortification_incantation_elden_ring_wiki_guide_200px (1).png" alt="Golden Lightning Fortification"><span>Golden Lightning</span></div>
-    <div class="skill"><img src="golden_vow_incantation_elden_ring_wiki_guide_200px (1).png" alt="Golden Vow"><span>Golden Vow</span></div>
-    <div class="skill"><img src="wrath of gold_incantation_elden_ring_wiki_guide_200px (1).png" alt="Wrath of Gold"><span>Wrath of Gold</span></div>
-    <div class="skill"><img src="barrier_of_gold_incantation_elden_ring_wiki_guide_200px (1).png" alt="Barrier of Gold"><span>Barrier of Gold</span></div>
-    <div class="skill"><img src="protection_of_the erdtree_incantation_elden_ring_wiki_guide_200px (1).png" alt="Protection of the Erdtree"><span>Erdtree Prot.</span></div>
-    <div class="skill"><img src="erdtree_heal_incantation_elden_ring_wiki_guide_200px (1).png" alt="Erdtree Heal"><span>Erdtree Heal</span></div>
-    <div class="skill"><img src="blessing_of_the_erdtree_incantation_elden_ring_wiki_guide_200px (1).png" alt="Blessing of the Erdtree"><span>Blessing Erdtree</span></div>
-    <div class="skill"><img src="blessings_boon_incantation_elden_ring_wiki_guide_200px (1).webp" alt="Blessing's Boon"><span>Blessing's Boon</span></div>
-    <div class="skill"><img src="radagons_rings_incantation_elden_ring_wiki_guide_200px (1).png" alt="Radagon's Rings"><span>Radagon's Rings</span></div>
-    <div class="skill"><img src="litany_of_proper_death_incantation_elden_ring_wiki_guide_200px (1).png" alt="Litany of Proper Death"><span>Litany Death</span></div>
-    <div class="skill"><img src="order_healing_incantation_elden_ring_wiki_guide_200px (1).png" alt="Order Healing"><span>Order Healing</span></div>
-    <div class="skill"><img src="law_of_regression_incantation_elden_ring_wiki_guide_200px (1).png" alt="Law of Regression"><span>Regression</span></div>
-    <div class="skill"><img src="law_of_causality_incantation_elden_ring.png" alt="Law of Causality"><span>Causality</span></div>
+  <div id="overlay"></div>
+  <div id="challenge-modal">
+    <p id="challenge-text">Complete a frase:</p>
+    <input type="text" id="challenge-input" placeholder="Digite a frase...">
+    <button onclick="checkChallenge()">Enviar</button>
   </div>
+  <div class="tree" id="skill-tree">
+    <!-- As habilidades serão inseridas aqui pelo script -->
+  </div>
+  <script>
+    const skills = [
+      { name: 'Heal', src: 'heal_incantation_elden_ring_wiki_guide_200px (1).png' },
+      { name: 'Urgent Heal', src: 'urgent_heal_incantation_elden_ring_wiki_guide_200px (1).png' },
+      { name: "Lord's Heal", src: 'lords_heal_incantation_elden_ring_wiki_guide_200px (1).png' },
+      { name: "Lord's Aid", src: "lord's_aid_incantation_elden_ring_wiki_guide_200px (1).png" },
+      { name: "Cure Poison", src: 'cure_poison_elden_ring_wiki_guide_200px (1).png' },
+      { name: 'Flame Fortification', src: 'flame_fortification_incantation_elden_ring_wiki_guide_200px (1).png' },
+      { name: 'Magic Fortification', src: 'magic_fortification_incantation_elden_ring_wiki_guide_200px (1).png' },
+      { name: "Lord's Divine Fort.", src: 'lords_divine_fortification_incantation_elden_ring_wiki_guide_200px (1).png' },
+      { name: 'Lightning Fort.', src: 'lightning_fortification_incantation_elden_ring_wiki_guide_200px (1).png' },
+      { name: 'Divine Fort.', src: 'divine_fortification_incantation_elden_ring_wiki_guide_200px (1).png' },
+      { name: 'Golden Lightning', src: 'golden_lightning_fortification_incantation_elden_ring_wiki_guide_200px (1).png' },
+      { name: 'Golden Vow', src: 'golden_vow_incantation_elden_ring_wiki_guide_200px (1).png' },
+      { name: 'Wrath of Gold', src: 'wrath of gold_incantation_elden_ring_wiki_guide_200px (1).png' },
+      { name: 'Barrier of Gold', src: 'barrier_of_gold_incantation_elden_ring_wiki_guide_200px (1).png' },
+      { name: 'Erdtree Prot.', src: 'protection_of_the erdtree_incantation_elden_ring_wiki_guide_200px (1).png' },
+      { name: 'Erdtree Heal', src: 'erdtree_heal_incantation_elden_ring_wiki_guide_200px (1).png' },
+      { name: 'Blessing Erdtree', src: 'blessing_of_the_erdtree_incantation_elden_ring_wiki_guide_200px (1).png' },
+      { name: "Blessing's Boon", src: 'blessings_boon_incantation_elden_ring_wiki_guide_200px (1).webp' },
+      { name: "Radagon's Rings", src: 'radagons_rings_incantation_elden_ring_wiki_guide_200px (1).png' },
+      { name: 'Litany Death', src: 'litany_of_proper_death_incantation_elden_ring_wiki_guide_200px (1).png' },
+      { name: 'Order Healing', src: 'order_healing_incantation_elden_ring_wiki_guide_200px (1).png' },
+      { name: 'Regression', src: 'law_of_regression_incantation_elden_ring_wiki_guide_200px (1).png' },
+      { name: 'Causality', src: 'law_of_causality_incantation_elden_ring.png' }
+    ];const tree = document.getElementById('skill-tree');
+
+skills.forEach(skill => {
+  const div = document.createElement('div');
+  div.className = 'skill';
+  div.innerHTML = `
+    <img src="${skill.src}" alt="${skill.name}">
+    <span>${skill.name}</span>
+    <div class="attributes">HP +10<br>Fé +1<br>Resistência +2</div>
+    <button class="upa-btn" onclick="startChallenge('${skill.name}')">Upa</button>
+  `;
+  tree.appendChild(div);
+});
+
+const phrases = [
+  "O céu azul é...",
+  "A árvore da vida...",
+  "Na escuridão eu...",
+  "Com coragem, ele...",
+  "A fé guia..."
+];
+
+let currentChallenge = '';
+function startChallenge(skillName) {
+  const random = phrases[Math.floor(Math.random() * phrases.length)];
+  currentChallenge = random;
+  document.getElementById('challenge-text').innerText = `Complete a frase: "${random}"`;
+  document.getElementById('overlay').style.display = 'block';
+  document.getElementById('challenge-modal').style.display = 'block';
+}
+
+function checkChallenge() {
+  const input = document.getElementById('challenge-input').value;
+  if (input.length > currentChallenge.length + 5) {
+    alert('Parabéns! Você completou a frase.');
+  } else {
+    alert('Frase incompleta! Tente de novo.');
+  }
+  document.getElementById('challenge-input').value = '';
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById('challenge-modal').style.display = 'none';
+}
+
+  </script>
 </body>
 </html>
