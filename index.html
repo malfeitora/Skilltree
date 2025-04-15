@@ -1,10 +1,10 @@
-/* Skill Tree Inspirada em Path of Exile - Ajustada para mais espaço HTML + CSS + JavaScript (SVG) Sistema interativo com 30 habilidades conectadas, atributos ao clicar e visual dark */
+/* Árvore de Habilidades com Sistema de Pontos baseado em Palavras-chave HTML + CSS + JavaScript (SVG) Sistema com 50 habilidades, palavras-chave para adicionar pontos, com dificuldade crescente. */
 
 <!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Árvore de Habilidades Sombria</title>
+  <title>Árvore de Habilidades Sombria - Sistema de Pontos</title>
   <style>
     body {
       margin: 0;
@@ -40,23 +40,59 @@
       white-space: nowrap;
       border: 1px solid #4caf50;
     }
+    .button {
+      background-color: #4caf50;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: none;
+    }
+    .button.active {
+      display: block;
+    }
+    .input-field {
+      background: #333;
+      color: #fff;
+      border: 1px solid #444;
+      padding: 5px;
+      font-size: 16px;
+      border-radius: 3px;
+    }
+    .input-field:focus {
+      outline: none;
+    }
   </style>
 </head>
 <body>
   <svg id="skillTree"></svg>
-  <div id="tooltip" class="tooltip"></div>  <script>
+  <div id="tooltip" class="tooltip"></div>
+  <div id="wordInput" class="input-container" style="position: absolute; visibility: hidden;">
+    <input type="text" id="word" class="input-field" placeholder="Digite a palavra..." />
+    <button id="submitWord" class="button">Enviar Palavra</button>
+  </div>  <script>
     const svg = document.getElementById('skillTree');
     const tooltip = document.getElementById('tooltip');
+    const wordInput = document.getElementById('wordInput');
+    const wordField = document.getElementById('word');
+    const submitWord = document.getElementById('submitWord');
 
     const nodes = [];
     const connections = [];
 
-    // Gerar 30 nós conectados aleatoriamente em um estilo circular
+    const words = [
+      'Sapo', 'S_p_', 'Abacaxi', 'Floresta', 'Cavalo', 'Mago', 'Dragão', 'Força', 'Escudo', 'Magia',
+      'Cura', 'Fúria', 'Terra', 'Vento', 'Água', 'Luz', 'Escuridão', 'Céu', 'Montanha', 'Espada',
+      'Fogo', 'Ouro', 'Cristal', 'Relâmpago', 'Vingança', 'Coragem', 'Tempestade', 'Sabedoria', 'Guerra', 'Rei'
+    ];
+
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2;
-    const radius = 450;  // Aumentando o raio para maior espaçamento
-    const total = 30;
+    const radius = 500;
+    const total = 50;
 
+    // Gerar 50 nós conectados
     for (let i = 0; i < total; i++) {
       const angle = (2 * Math.PI * i) / total;
       const x = centerX + radius * Math.cos(angle);
@@ -71,11 +107,13 @@
         level: 0,
         max: 7,
         children: [],
+        word: words[i % words.length],
+        points: 0
       };
       nodes.push(node);
     }
 
-    // Conectar cada nó ao próximo (em anel) + 1 conexão extra para diversidade
+    // Conectar os nós
     for (let i = 0; i < total; i++) {
       const next = (i + 1) % total;
       connections.push([i, next]);
@@ -114,7 +152,7 @@
         tooltip.style.display = 'none';
       });
 
-      // Clicar para aumentar nível
+      // Clicar para ativar e mostrar o botão de pontos
       circle.addEventListener('click', () => {
         if (!node.active || node.level >= node.max) return;
         node.level++;
@@ -124,11 +162,31 @@
             document.getElementById(`node-${cid}`).classList.add('active');
           });
         }
-        circle.innerHTML = `${node.level}/${node.max}`;
+        document.getElementById(`node-${node.id}`).classList.add('active');
+        wordInput.style.visibility = 'visible';
+        wordField.focus();
+        wordField.value = '';
       });
 
       circle.setAttribute("id", `node-${node.id}`);
       svg.appendChild(circle);
+    });
+
+    // Verificação da palavra e atribuição de pontos
+    submitWord.addEventListener('click', () => {
+      const word = wordField.value;
+      const node = nodes.find(n => n.active);
+
+      if (word === node.word) {
+        node.points++;
+        wordField.value = '';
+        if (node.points === 7) {
+          alert(`Habilidade ${node.name} desbloqueada com sucesso!`);
+        }
+        wordInput.style.visibility = 'hidden';
+      } else {
+        alert('Palavra incorreta, tente novamente!');
+      }
     });
   </script></body>
 </html>
