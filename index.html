@@ -28,6 +28,7 @@
       padding: 10px;
       border-radius: 10px;
       background-color: #1c1c1c;
+      cursor: pointer;
     }
     .skill img {
       width: 64px;
@@ -52,6 +53,7 @@
       font-weight: bold;
       border-radius: 4px;
       cursor: pointer;
+      display: none;
     }
     #challenge-modal {
       position: fixed;
@@ -78,6 +80,11 @@
       display: none;
       z-index: 999;
     }
+    #timer {
+      font-size: 1rem;
+      color: gold;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -85,12 +92,10 @@
   <div id="challenge-modal">
     <p id="challenge-text">Complete a frase:</p>
     <input type="text" id="challenge-input" placeholder="Digite a frase...">
+    <div id="timer"></div>
     <button onclick="checkChallenge()">Enviar</button>
   </div>
-  <div class="tree" id="skill-tree">
-    <!-- As habilidades serão inseridas aqui pelo script -->
-  </div>
-  <script>
+  <div class="tree" id="skill-tree"></div>  <script>
     const skills = [
       { name: 'Heal', src: 'heal_incantation_elden_ring_wiki_guide_200px (1).png' },
       { name: 'Urgent Heal', src: 'urgent_heal_incantation_elden_ring_wiki_guide_200px (1).png' },
@@ -115,49 +120,81 @@
       { name: 'Order Healing', src: 'order_healing_incantation_elden_ring_wiki_guide_200px (1).png' },
       { name: 'Regression', src: 'law_of_regression_incantation_elden_ring_wiki_guide_200px (1).png' },
       { name: 'Causality', src: 'law_of_causality_incantation_elden_ring.png' }
-    ];const tree = document.getElementById('skill-tree');
+    ];
 
-skills.forEach(skill => {
-  const div = document.createElement('div');
-  div.className = 'skill';
-  div.innerHTML = `
-    <img src="${skill.src}" alt="${skill.name}">
-    <span>${skill.name}</span>
-    <div class="attributes">HP +10<br>Fé +1<br>Resistência +2</div>
-    <button class="upa-btn" onclick="startChallenge('${skill.name}')">Upa</button>
-  `;
-  tree.appendChild(div);
-});
+    const tree = document.getElementById('skill-tree');
 
-const phrases = [
-  "O céu azul é...",
-  "A árvore da vida...",
-  "Na escuridão eu...",
-  "Com coragem, ele...",
-  "A fé guia..."
-];
+    skills.forEach(skill => {
+      const div = document.createElement('div');
+      div.className = 'skill';
+      div.innerHTML = `
+        <img src="${skill.src}" alt="${skill.name}">
+        <span>${skill.name}</span>
+        <div class="attributes">HP +10<br>Fé +1<br>Resistência +2</div>
+        <button class="upa-btn">Upa</button>
+      `;
 
-let currentChallenge = '';
-function startChallenge(skillName) {
-  const random = phrases[Math.floor(Math.random() * phrases.length)];
-  currentChallenge = random;
-  document.getElementById('challenge-text').innerText = `Complete a frase: "${random}"`;
-  document.getElementById('overlay').style.display = 'block';
-  document.getElementById('challenge-modal').style.display = 'block';
-}
+      const upaBtn = div.querySelector('.upa-btn');
+      upaBtn.onclick = () => startChallenge(skill.name);
+      div.onclick = () => {
+        upaBtn.style.display = 'inline-block';
+      };
 
-function checkChallenge() {
-  const input = document.getElementById('challenge-input').value;
-  if (input.length > currentChallenge.length + 5) {
-    alert('Parabéns! Você completou a frase.');
-  } else {
-    alert('Frase incompleta! Tente de novo.');
-  }
-  document.getElementById('challenge-input').value = '';
-  document.getElementById('overlay').style.display = 'none';
-  document.getElementById('challenge-modal').style.display = 'none';
-}
+      tree.appendChild(div);
+    });
 
-  </script>
-</body>
+    const phrases = [
+      "O céu azul é...",
+      "A árvore da vida...",
+      "Na escuridão eu...",
+      "Com coragem, ele...",
+      "A fé guia..."
+    ];
+
+    let currentChallenge = '';
+    let timer;
+    let timeLeft = 300;
+
+    function startChallenge(skillName) {
+      const random = phrases[Math.floor(Math.random() * phrases.length)];
+      currentChallenge = random;
+      document.getElementById('challenge-text').innerText = `Complete a frase: "${random}"`;
+      document.getElementById('overlay').style.display = 'block';
+      document.getElementById('challenge-modal').style.display = 'block';
+      document.getElementById('challenge-input').value = '';
+      timeLeft = 300;
+      updateTimer();
+      timer = setInterval(() => {
+        timeLeft--;
+        updateTimer();
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          alert("Tempo esgotado!");
+          closeChallenge();
+        }
+      }, 1000);
+    }
+
+    function updateTimer() {
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = timeLeft % 60;
+      document.getElementById('timer').innerText = `Tempo restante: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    }
+
+    function checkChallenge() {
+      const input = document.getElementById('challenge-input').value;
+      if (input.length > currentChallenge.length + 5) {
+        alert('Parabéns! Você completou a frase.');
+      } else {
+        alert('Frase incompleta! Tente de novo.');
+      }
+      closeChallenge();
+    }
+
+    function closeChallenge() {
+      clearInterval(timer);
+      document.getElementById('challenge-modal').style.display = 'none';
+      document.getElementById('overlay').style.display = 'none';
+    }
+  </script></body>
 </html>
