@@ -1,248 +1,90 @@
-<!DOCTYPE html><html lang="pt-BR">
+<!DOCTYPE html><html lang="pt-br">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Árvore de Habilidades - Elden Ring</title>
+  <title>VAGABOND</title>
   <style>
     body {
-      background-color: #0d0d0d;
-      color: white;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      padding: 40px 20px;
-    }
-    .skill-tree {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 40px;
-      position: relative;
-    }
-    .skill {
-      background-color: #1a1a1a;
-      border: 2px solid gold;
-      border-radius: 12px;
-      text-align: center;
-      padding: 12px;
-      width: 140px;
-      transition: transform 0.2s;
-      opacity: 0.4;
-      pointer-events: none;
-      position: relative;
-      z-index: 2;
-    }
-    .skill.unlocked {
-      opacity: 1;
-      pointer-events: auto;
-    }
-    .skill:hover {
-      transform: scale(1.05);
-      cursor: pointer;
-    }
-    .skill img {
-      width: 64px;
-      height: 64px;
-      border-radius: 6px;
-      margin-bottom: 8px;
-    }
-    .attributes {
-      font-size: 0.8rem;
-      margin: 5px 0;
-    }
-    .upa-btn {
-      background-color: gold;
-      color: black;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 5px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 5px;
-      display: none;
-    }
-    .connector {
-      width: 4px;
-      height: 40px;
-      background: gold;
-      margin: 0 auto;
-      z-index: 1;
-    }
-    #overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: rgba(0,0,0,0.7);
-      z-index: 5;
-      display: none;
-    }
-    #game-box {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 90vw;
-      height: 90vh;
-      background: #111;
-      border: 2px solid gold;
-      z-index: 10;
-      display: none;
-      overflow: hidden;
-    }
-    .ball {
-      width: 30px;
-      height: 30px;
-      background: gold;
-      border-radius: 50%;
-      position: absolute;
-      cursor: pointer;
-    }
-    #score, #game-timer {
-      position: absolute;
-      top: 10px;
-      font-size: 1.2rem;
-      color: white;
-      z-index: 11;
-    }
-    #score { left: 10px; }
-    #game-timer { right: 10px; }
+      margin: 0;
+      font-family: 'Georgia', serif;
+      background: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWkbAM130_7CvsqZdfB8h7bsP89mtkCweHAW7q4MlQoM8BEUlp6J0jjCs&s=10') no-repeat center center fixed;
+      background-size: cover;
+      color: #f5f5dc;
+    }.skill-tree {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 60px;
+  padding: 60px;
+}
+
+.skill {
+  position: relative;
+  text-align: center;
+  cursor: pointer;
+}
+
+.skill img {
+  width: 64px;
+  height: 64px;
+  border: 2px solid #ffd700;
+  border-radius: 12px;
+  transition: transform 0.2s;
+}
+
+.skill img:hover {
+  transform: scale(1.1);
+}
+
+.pericia-btn {
+  margin-top: 10px;
+  display: none;
+  background-color: #8b0000;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.line {
+  width: 4px;
+  height: 60px;
+  background: #ffd700;
+}
+
   </style>
 </head>
 <body>
-  <div class="skill-tree" id="tree"></div>  <div id="overlay"></div>
-  <div id="game-box">
-    <div id="score">0 / 20</div>
-    <div id="game-timer">23</div>
+  <div class="skill-tree" id="skillTree">
+    <!-- Exemplo de Skill -->
+    <div class="skill" onclick="togglePericia(this)">
+      <img src="Stampede_skill_icon.png" alt="Stampede">
+      <button class="pericia-btn" onclick="startTest(event)">Perícia</button>
+    </div>
+    <div class="line"></div>
+    <div class="skill" onclick="togglePericia(this)">
+      <img src="Shield_Charge_skill_icon.png" alt="Shield Charge">
+      <button class="pericia-btn" onclick="startTest(event)">Perícia</button>
+    </div>
+    <div class="line"></div>
+    <!-- Continue com os outros ícones seguindo o formato de Z com div.line entre eles -->
   </div>  <script>
-    const habilidades = [
-      'heal_incantation_elden_ring_wiki_guide_200px (1).png',
-      'urgent_heal_incantation_elden_ring_wiki_guide_200px (1).png',
-      'lords_heal_incantation_elden_ring_wiki_guide_200px (1).png',
-      "lord's_aid_incantation_elden_ring_wiki_guide_200px (1).png",
-      'cure_poison_elden_ring_wiki_guide_200px (1).png'
-    ];
-
-    const tree = document.getElementById('tree');
-    let currentSkillIndex = 0;
-    let ballsClicked = 0;
-    let gameTimeLeft = 23;
-    let gameInterval;
-
-    function criarHabilidades() {
-      habilidades.forEach((src, index) => {
-        if (index > 0) {
-          const line = document.createElement('div');
-          line.className = 'connector';
-          tree.appendChild(line);
-        }
-
-        const div = document.createElement('div');
-        div.className = 'skill';
-        if (index === 0) div.classList.add('unlocked');
-
-        const img = document.createElement('img');
-        img.src = src;
-        img.alt = 'Skill Icon';
-
-        const attr = document.createElement('div');
-        attr.className = 'attributes';
-        attr.dataset.hp = 10;
-        attr.dataset.faith = 1;
-        attr.dataset.res = 2;
-        attr.dataset.level = 0;
-        attr.innerHTML = `HP +10<br>Fé +1<br>Resistência +2<br>Nível: 0/7`;
-
-        const btn = document.createElement('button');
-        btn.className = 'upa-btn';
-        btn.textContent = 'Upa';
-        btn.onclick = () => iniciarMinigame(attr, div, index);
-
-        img.onclick = () => {
-          if (div.classList.contains('unlocked')) {
-            btn.style.display = 'inline-block';
-          }
-        };
-
-        div.appendChild(img);
-        div.appendChild(attr);
-        div.appendChild(btn);
-        tree.appendChild(div);
-      });
-    }
-
-    function iniciarMinigame(attr, div, index) {
-      document.getElementById('overlay').style.display = 'block';
-      document.getElementById('game-box').style.display = 'block';
-      ballsClicked = 0;
-      gameTimeLeft = 23;
-      atualizarHUD();
-      gerarBola(attr, div, index);
-      gameInterval = setInterval(() => {
-        gameTimeLeft--;
-        atualizarHUD();
-        if (gameTimeLeft <= 0) {
-          encerrarJogo(false);
-        }
-      }, 1000);
-    }
-
-    function atualizarHUD() {
-      document.getElementById('score').innerText = `${ballsClicked} / 20`;
-      document.getElementById('game-timer').innerText = gameTimeLeft;
-    }
-
-    function gerarBola(attr, div, index) {
-      if (ballsClicked >= 20) return;
-      const gameBox = document.getElementById('game-box');
-      const ball = document.createElement('div');
-      ball.className = 'ball';
-      const x = Math.random() * (gameBox.offsetWidth - 30);
-      const y = Math.random() * (gameBox.offsetHeight - 30);
-      ball.style.left = `${x}px`;
-      ball.style.top = `${y}px`;
-      ball.onclick = () => {
-        ball.remove();
-        ballsClicked++;
-        atualizarHUD();
-        if (ballsClicked >= 20) {
-          encerrarJogo(true, attr, div, index);
-        } else {
-          gerarBola(attr, div, index);
-        }
-      };
-      gameBox.appendChild(ball);
-    }
-
-    function encerrarJogo(sucesso, attr = null, div = null, index = 0) {
-      clearInterval(gameInterval);
-      document.getElementById('overlay').style.display = 'none';
-      document.getElementById('game-box').style.display = 'none';
-      document.querySelectorAll('.ball').forEach(b => b.remove());
-
-      if (sucesso && attr) {
-        let level = parseInt(attr.dataset.level) + 1;
-        attr.dataset.level = level;
-        attr.dataset.hp = 10 + level * 5;
-        attr.dataset.faith = 1 + level;
-        attr.dataset.res = 2 + level;
-        attr.innerHTML = `HP +${attr.dataset.hp}<br>Fé +${attr.dataset.faith}<br>Resistência +${attr.dataset.res}<br>Nível: ${level}/7`;
-
-        if (level >= 7) {
-          const nextSkill = tree.querySelectorAll('.skill')[index + 1];
-          if (nextSkill) nextSkill.classList.add('unlocked');
-          alert('Habilidade aprimorada completamente! Próxima desbloqueada.');
-        } else {
-          alert('Desafio concluído! Nível aumentado.');
-        }
-      } else if (!sucesso) {
-        alert('Tempo esgotado!');
+    function togglePericia(skillDiv) {
+      const btn = skillDiv.querySelector('.pericia-btn');
+      if (btn.style.display === 'block') {
+        btn.style.display = 'none';
+      } else {
+        // Oculta todos os outros botões
+        document.querySelectorAll('.pericia-btn').forEach(b => b.style.display = 'none');
+        btn.style.display = 'block';
       }
     }
 
-    criarHabilidades();
+    function startTest(event) {
+      event.stopPropagation();
+      window.location.href = 'teste.html';
+    }
   </script></body>
 </html>
