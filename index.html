@@ -1,240 +1,73 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Árvore de Habilidades - Jogo de Palavras</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skill Tree - Elden Ring Incantations</title>
   <style>
     body {
-      margin: 0;
-      background: #0b0b0b;
-      overflow: hidden;
+      background-color: #0f0f0f;
+      color: #fff;
       font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      padding: 2rem;
     }
-    svg {
-      width: 100vw;
-      height: 100vh;
-      display: block;
+    .tree {
+      display: grid;
+      grid-template-columns: repeat(6, 100px);
+      gap: 40px;
+      position: relative;
     }
-    .node {
-      fill: #222;
-      stroke: #999;
-      stroke-width: 2;
-      cursor: pointer;
-      transition: 0.2s;
+    .skill {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
     }
-    .node.active {
-      fill: #4caf50;
-      stroke: #fff;
-    }
-    .tooltip {
-      position: absolute;
-      background: #1b1b1b;
-      color: #eee;
-      padding: 8px 12px;
-      border-radius: 5px;
-      font-size: 14px;
-      pointer-events: none;
-      display: none;
-      white-space: nowrap;
-      border: 1px solid #4caf50;
-    }
-    .button {
-      background-color: #4caf50;
-      color: #fff;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      display: none;
-    }
-    .button.active {
-      display: block;
-    }
-    .input-field {
-      background: #333;
-      color: #fff;
-      border: 1px solid #444;
-      padding: 5px;
-      font-size: 16px;
-      border-radius: 3px;
-    }
-    .input-field:focus {
-      outline: none;
-    }
-    #wordInput {
-      position: absolute;
-      visibility: hidden;
-    }
-    #gameContainer {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+    .skill img {
+      width: 64px;
+      height: 64px;
+      border: 2px solid gold;
+      border-radius: 8px;
       background-color: #222;
-      padding: 20px;
-      display: none;
+    }
+    .skill span {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+    }
+    .connector {
+      position: absolute;
+      width: 2px;
+      background: gold;
     }
   </style>
 </head>
 <body>
-  <svg id="skillTree"></svg>
-  <div id="tooltip" class="tooltip"></div>
-  <div id="wordInput" class="input-container">
-    <input type="text" id="word" class="input-field" placeholder="Digite a palavra..." />
-    <button id="submitWord" class="button">Enviar Palavra</button>
+  <div class="tree">
+    <div class="skill"><img src="heal_incantation_elden_ring_wiki_guide_200px (1).png" alt="Heal"><span>Heal</span></div>
+    <div class="skill"><img src="urgent_heal_incantation_elden_ring_wiki_guide_200px (1).png" alt="Urgent Heal"><span>Urgent Heal</span></div>
+    <div class="skill"><img src="lords_heal_incantation_elden_ring_wiki_guide_200px (1).png" alt="Lord's Heal"><span>Lord's Heal</span></div>
+    <div class="skill"><img src="lord's_aid_incantation_elden_ring_wiki_guide_200px (1).png" alt="Lord's Aid"><span>Lord's Aid</span></div>
+    <div class="skill"><img src="cure_poison_elden_ring_wiki_guide_200px (1).png" alt="Cure Poison"><span>Cure Poison</span></div>
+    <div class="skill"><img src="flame_fortification_incantation_elden_ring_wiki_guide_200px (1).png" alt="Flame Fortification"><span>Flame Fortification</span></div>
+    <div class="skill"><img src="magic_fortification_incantation_elden_ring_wiki_guide_200px (1).png" alt="Magic Fortification"><span>Magic Fortification</span></div>
+    <div class="skill"><img src="lords_divine_fortification_incantation_elden_ring_wiki_guide_200px (1).png" alt="Lord's Divine Fortification"><span>Lord's Divine Fort.</span></div>
+    <div class="skill"><img src="lightning_fortification_incantation_elden_ring_wiki_guide_200px (1).png" alt="Lightning Fortification"><span>Lightning Fort.</span></div>
+    <div class="skill"><img src="divine_fortification_incantation_elden_ring_wiki_guide_200px (1).png" alt="Divine Fortification"><span>Divine Fort.</span></div>
+    <div class="skill"><img src="golden_lightning_fortification_incantation_elden_ring_wiki_guide_200px (1).png" alt="Golden Lightning Fortification"><span>Golden Lightning</span></div>
+    <div class="skill"><img src="golden_vow_incantation_elden_ring_wiki_guide_200px (1).png" alt="Golden Vow"><span>Golden Vow</span></div>
+    <div class="skill"><img src="wrath of gold_incantation_elden_ring_wiki_guide_200px (1).png" alt="Wrath of Gold"><span>Wrath of Gold</span></div>
+    <div class="skill"><img src="barrier_of_gold_incantation_elden_ring_wiki_guide_200px (1).png" alt="Barrier of Gold"><span>Barrier of Gold</span></div>
+    <div class="skill"><img src="protection_of_the erdtree_incantation_elden_ring_wiki_guide_200px (1).png" alt="Protection of the Erdtree"><span>Erdtree Prot.</span></div>
+    <div class="skill"><img src="erdtree_heal_incantation_elden_ring_wiki_guide_200px (1).png" alt="Erdtree Heal"><span>Erdtree Heal</span></div>
+    <div class="skill"><img src="blessing_of_the_erdtree_incantation_elden_ring_wiki_guide_200px (1).png" alt="Blessing of the Erdtree"><span>Blessing Erdtree</span></div>
+    <div class="skill"><img src="blessings_boon_incantation_elden_ring_wiki_guide_200px (1).webp" alt="Blessing's Boon"><span>Blessing's Boon</span></div>
+    <div class="skill"><img src="radagons_rings_incantation_elden_ring_wiki_guide_200px (1).png" alt="Radagon's Rings"><span>Radagon's Rings</span></div>
+    <div class="skill"><img src="litany_of_proper_death_incantation_elden_ring_wiki_guide_200px (1).png" alt="Litany of Proper Death"><span>Litany Death</span></div>
+    <div class="skill"><img src="order_healing_incantation_elden_ring_wiki_guide_200px (1).png" alt="Order Healing"><span>Order Healing</span></div>
+    <div class="skill"><img src="law_of_regression_incantation_elden_ring_wiki_guide_200px (1).png" alt="Law of Regression"><span>Regression</span></div>
+    <div class="skill"><img src="law_of_causality_incantation_elden_ring.png" alt="Law of Causality"><span>Causality</span></div>
   </div>
-
-  <div id="gameContainer">
-    <h3 id="gameQuestion"></h3>
-    <input type="text" id="answer" class="input-field" placeholder="Complete a frase..." />
-    <button id="submitAnswer" class="button">Responder</button>
-    <p id="timer">Tempo: 5:00</p>
-  </div>
-
-  <script>
-    const svg = document.getElementById('skillTree');
-    const tooltip = document.getElementById('tooltip');
-    const wordInput = document.getElementById('wordInput');
-    const wordField = document.getElementById('word');
-    const submitWord = document.getElementById('submitWord');
-    const gameContainer = document.getElementById('gameContainer');
-    const gameQuestion = document.getElementById('gameQuestion');
-    const answerField = document.getElementById('answer');
-    const submitAnswer = document.getElementById('submitAnswer');
-    const timerDisplay = document.getElementById('timer');
-    
-    const nodes = [];
-    const connections = [];
-    let currentSkill = null;
-    let remainingTime = 300; // 5 minutes in seconds
-    let interval;
-    
-    // Gerar 50 habilidades conectadas
-    for (let i = 0; i < 50; i++) {
-      const angle = (2 * Math.PI * i) / 50;
-      const x = window.innerWidth / 2 + 300 * Math.cos(angle);
-      const y = window.innerHeight / 2 + 300 * Math.sin(angle);
-      const node = {
-        id: i,
-        name: `Habilidade ${i + 1}`,
-        description: `Atributos da habilidade ${i + 1}`,
-        x,
-        y,
-        level: 0,
-        maxLevel: 6,
-        word: generateRandomWord(i),
-        unlocked: i === 0,
-        children: [],
-      };
-      nodes.push(node);
-    }
-    
-    // Conectar as habilidades
-    for (let i = 0; i < 50; i++) {
-      const next = (i + 1) % 50;
-      connections.push([i, next]);
-      if (i % 5 === 0 && i + 5 < 50) connections.push([i, i + 5]);
-      nodes[i].children.push(next);
-    }
-
-    // Renderizar as conexões
-    connections.forEach(([from, to]) => {
-      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      line.setAttribute("x1", nodes[from].x);
-      line.setAttribute("y1", nodes[from].y);
-      line.setAttribute("x2", nodes[to].x);
-      line.setAttribute("y2", nodes[to].y);
-      line.setAttribute("stroke", "#444");
-      line.setAttribute("stroke-width", "2");
-      svg.appendChild(line);
-    });
-
-    // Renderizar os nós (habilidades)
-    nodes.forEach((node) => {
-      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      circle.setAttribute("cx", node.x);
-      circle.setAttribute("cy", node.y);
-      circle.setAttribute("r", 20);
-      circle.setAttribute("class", "node");
-      circle.setAttribute("id", `node-${node.id}`);
-      
-      // Tooltip
-      circle.addEventListener('mousemove', (e) => {
-        tooltip.innerHTML = `<strong>${node.name}</strong><br>${node.description}<br>${node.level}/${node.maxLevel}`;
-        tooltip.style.left = e.pageX + 10 + 'px';
-        tooltip.style.top = e.pageY + 10 + 'px';
-        tooltip.style.display = 'block';
-      });
-      circle.addEventListener('mouseleave', () => {
-        tooltip.style.display = 'none';
-      });
-
-      // Click para mostrar atributos e o botão de "Upar"
-      circle.addEventListener('click', () => {
-        if (node.level < node.maxLevel && node.unlocked) {
-          currentSkill = node;
-          showUparButton(node);
-        }
-      });
-
-      svg.appendChild(circle);
-    });
-
-    // Gerar uma palavra aleatória
-    function generateRandomWord(index) {
-      const words = ['Sapo', 'Abacaxi', 'Magia', 'Cavalo', 'Dragão', 'Floresta', 'Resistência', 'Fúria', 'Força', 'Cura'];
-      return words[index % words.length];
-    }
-
-    // Mostrar o botão de Upar
-    function showUparButton(node) {
-      const button = document.createElement('button');
-      button.innerText = "Upar";
-      button.className = 'button active';
-      button.onclick = function() {
-        startWordGame();
-      };
-      svg.appendChild(button);
-    }
-
-    // Iniciar o jogo de palavras
-    function startWordGame() {
-      gameContainer.style.display = 'block';
-      const phrase = `Complete a palavra: ${currentSkill.word}`;
-      gameQuestion.innerHTML = phrase;
-      startTimer();
-    }
-
-    // Timer de 5 minutos
-    function startTimer() {
-      interval = setInterval(() => {
-        if (remainingTime <= 0) {
-          clearInterval(interval);
-          alert('Tempo esgotado! A palavra não foi completada.');
-          gameContainer.style.display = 'none';
-        } else {
-          const minutes = Math.floor(remainingTime / 60);
-          const seconds = remainingTime % 60;
-          timerDisplay.innerHTML = `Tempo: ${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
-          remainingTime--;
-        }
-      }, 1000);
-    }
-
-    // Responder a palavra
-    submitAnswer.addEventListener('click', () => {
-      const answer = answerField.value;
-      if (answer === currentSkill.word) {
-        alert('Palavra correta!');
-        gameContainer.style.display = 'none';
-        currentSkill.level++;
-        remainingTime = 300; // Resetar o tempo
-      } else {
-        alert('Palavra incorreta! Tente novamente.');
-      }
-      answerField.value = '';
-    });
-  </script>
 </body>
 </html>
