@@ -54,25 +54,6 @@
       margin-top: 5px;
       display: none;
     }
-    #challenge-box {
-      background: #111;
-      border: 2px solid gold;
-      padding: 20px;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      display: none;
-      z-index: 10;
-    }
-    #challenge-box input {
-      width: 100%;
-      margin-top: 10px;
-    }
-    #timer {
-      color: gold;
-      margin-top: 10px;
-    }
     #overlay {
       position: fixed;
       top: 0;
@@ -83,15 +64,43 @@
       z-index: 5;
       display: none;
     }
+    #game-box {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90vw;
+      height: 90vh;
+      background: #111;
+      border: 2px solid gold;
+      z-index: 10;
+      display: none;
+      overflow: hidden;
+    }
+    .ball {
+      width: 30px;
+      height: 30px;
+      background: gold;
+      border-radius: 50%;
+      position: absolute;
+      cursor: pointer;
+    }
+    #score, #game-timer {
+      position: absolute;
+      top: 10px;
+      font-size: 1.2rem;
+      color: white;
+      z-index: 11;
+    }
+    #score { left: 10px; }
+    #game-timer { right: 10px; }
   </style>
 </head>
 <body>
   <div class="skill-tree" id="tree"></div>  <div id="overlay"></div>
-  <div id="challenge-box">
-    <p id="challenge-text">Complete a frase:</p>
-    <input type="text" id="challenge-input">
-    <div id="timer"></div>
-    <button onclick="submitChallenge()">Enviar</button>
+  <div id="game-box">
+    <div id="score">0 / 20</div>
+    <div id="game-timer">15</div>
   </div>  <script>
     const habilidades = [
       'heal_incantation_elden_ring_wiki_guide_200px (1).png',
@@ -101,21 +110,13 @@
       'cure_poison_elden_ring_wiki_guide_200px (1).png'
     ];
 
-    const frases = [
-      'O cavaleiro caminhava quando...',
-      'Na luz dourada ele encontrou...',
-      'A fé dele era tão forte que...',
-      'Mesmo ferido, ele levantou e...',
-      'A benção do Erdtree disse...'
-    ];
-
-    let timer;
-    let timeLeft = 300;
-    let currentPhrase = '';
-
     const tree = document.getElementById('tree');
+    let ballsClicked = 0;
+    let ballTimer;
+    let gameTimeLeft = 15;
+    let gameInterval;
 
-    habilidades.forEach((src, index) => {
+    habilidades.forEach((src) => {
       const div = document.createElement('div');
       div.className = 'skill';
 
@@ -130,7 +131,7 @@
       const btn = document.createElement('button');
       btn.className = 'upa-btn';
       btn.textContent = 'Upa';
-      btn.onclick = () => iniciarDesafio();
+      btn.onclick = () => iniciarMinigame();
 
       img.onclick = () => {
         btn.style.display = 'inline-block';
@@ -142,46 +143,55 @@
       tree.appendChild(div);
     });
 
-    function iniciarDesafio() {
-      const aleatoria = frases[Math.floor(Math.random() * frases.length)];
-      currentPhrase = aleatoria;
-      document.getElementById('challenge-text').innerText = `Complete a frase: "${aleatoria}"`;
-      document.getElementById('challenge-input').value = '';
-      document.getElementById('challenge-box').style.display = 'block';
+    function iniciarMinigame() {
       document.getElementById('overlay').style.display = 'block';
-      timeLeft = 300;
-      atualizarTimer();
-      timer = setInterval(() => {
-        timeLeft--;
-        atualizarTimer();
-        if (timeLeft <= 0) {
-          clearInterval(timer);
-          alert('Tempo esgotado!');
-          fecharDesafio();
+      document.getElementById('game-box').style.display = 'block';
+      ballsClicked = 0;
+      gameTimeLeft = 15;
+      atualizarHUD();
+      gerarBola();
+      gameInterval = setInterval(() => {
+        gameTimeLeft--;
+        atualizarHUD();
+        if (gameTimeLeft <= 0) {
+          encerrarJogo(false);
         }
       }, 1000);
     }
 
-    function atualizarTimer() {
-      const min = Math.floor(timeLeft / 60);
-      const sec = timeLeft % 60;
-      document.getElementById('timer').innerText = `Tempo: ${min}:${sec < 10 ? '0' : ''}${sec}`;
+    function atualizarHUD() {
+      document.getElementById('score').innerText = `${ballsClicked} / 20`;
+      document.getElementById('game-timer').innerText = gameTimeLeft;
     }
 
-    function submitChallenge() {
-      const input = document.getElementById('challenge-input').value;
-      if (input.length > currentPhrase.length + 5) {
-        alert('Desafio concluído!');
-      } else {
-        alert('Frase muito curta, tente novamente!');
-      }
-      fecharDesafio();
+    function gerarBola() {
+      if (ballsClicked >= 20) return;
+      const gameBox = document.getElementById('game-box');
+      const ball = document.createElement('div');
+      ball.className = 'ball';
+      const x = Math.random() * (gameBox.offsetWidth - 30);
+      const y = Math.random() * (gameBox.offsetHeight - 30);
+      ball.style.left = `${x}px`;
+      ball.style.top = `${y}px`;
+      ball.onclick = () => {
+        ball.remove();
+        ballsClicked++;
+        atualizarHUD();
+        if (ballsClicked >= 20) {
+          encerrarJogo(true);
+        } else {
+          gerarBola();
+        }
+      };
+      gameBox.appendChild(ball);
     }
 
-    function fecharDesafio() {
-      clearInterval(timer);
-      document.getElementById('challenge-box').style.display = 'none';
+    function encerrarJogo(sucesso) {
+      clearInterval(gameInterval);
       document.getElementById('overlay').style.display = 'none';
+      document.getElementById('game-box').style.display = 'none';
+      document.querySelectorAll('.ball').forEach(b => b.remove());
+      alert(sucesso ? 'Desafio concluído!' : 'Tempo esgotado!');
     }
   </script></body>
 </html>
