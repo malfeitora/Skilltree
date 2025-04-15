@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Árvore de Habilidades - Sistema de Pontos</title>
+  <title>Árvore de Habilidades - Jogo de Palavras</title>
   <style>
     body {
       margin: 0;
@@ -12,8 +12,8 @@
       font-family: 'Segoe UI', sans-serif;
     }
     svg {
-      width: 150vw;
-      height: 150vh;
+      width: 100vw;
+      height: 100vh;
       display: block;
     }
     .node {
@@ -62,14 +62,34 @@
     .input-field:focus {
       outline: none;
     }
+    #wordInput {
+      position: absolute;
+      visibility: hidden;
+    }
+    #gameContainer {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #222;
+      padding: 20px;
+      display: none;
+    }
   </style>
 </head>
 <body>
   <svg id="skillTree"></svg>
   <div id="tooltip" class="tooltip"></div>
-  <div id="wordInput" class="input-container" style="position: absolute; visibility: hidden;">
+  <div id="wordInput" class="input-container">
     <input type="text" id="word" class="input-field" placeholder="Digite a palavra..." />
     <button id="submitWord" class="button">Enviar Palavra</button>
+  </div>
+
+  <div id="gameContainer">
+    <h3 id="gameQuestion"></h3>
+    <input type="text" id="answer" class="input-field" placeholder="Complete a frase..." />
+    <button id="submitAnswer" class="button">Responder</button>
+    <p id="timer">Tempo: 5:00</p>
   </div>
 
   <script>
@@ -78,52 +98,47 @@
     const wordInput = document.getElementById('wordInput');
     const wordField = document.getElementById('word');
     const submitWord = document.getElementById('submitWord');
-
+    const gameContainer = document.getElementById('gameContainer');
+    const gameQuestion = document.getElementById('gameQuestion');
+    const answerField = document.getElementById('answer');
+    const submitAnswer = document.getElementById('submitAnswer');
+    const timerDisplay = document.getElementById('timer');
+    
     const nodes = [];
     const connections = [];
-
-    const words = [
-      'Sapo', 'S_p_', 'Abacaxi', 'Floresta', 'Cavalo', 'Mago', 'Dragão', 'Força', 'Escudo', 'Magia',
-      'Cura', 'Fúria', 'Terra', 'Vento', 'Água', 'Luz', 'Escuridão', 'Céu', 'Montanha', 'Espada',
-      'Fogo', 'Ouro', 'Cristal', 'Relâmpago', 'Vingança', 'Coragem', 'Tempestade', 'Sabedoria', 'Guerra', 'Rei',
-      'Mistério', 'Luz_r_', 'Nevoa', 'Raiva', 'Resistência', 'Concentração', 'Ilusão', 'Invocação', 'Imortal', 'Aura'
-    ];
-
-    const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
-    const radius = 500;
-    const total = 50;
-
-    // Gerar 50 nós conectados
-    for (let i = 0; i < total; i++) {
-      const angle = (2 * Math.PI * i) / total;
-      const x = centerX + radius * Math.cos(angle);
-      const y = centerY + radius * Math.sin(angle);
+    let currentSkill = null;
+    let remainingTime = 300; // 5 minutes in seconds
+    let interval;
+    
+    // Gerar 50 habilidades conectadas
+    for (let i = 0; i < 50; i++) {
+      const angle = (2 * Math.PI * i) / 50;
+      const x = window.innerWidth / 2 + 300 * Math.cos(angle);
+      const y = window.innerHeight / 2 + 300 * Math.sin(angle);
       const node = {
         id: i,
         name: `Habilidade ${i + 1}`,
         description: `Atributos da habilidade ${i + 1}`,
         x,
         y,
-        active: i === 0, // Só a primeira é ativa
         level: 0,
-        max: 7,
+        maxLevel: 6,
+        word: generateRandomWord(i),
+        unlocked: i === 0,
         children: [],
-        word: words[i % words.length],
-        points: 0
       };
       nodes.push(node);
     }
-
-    // Conectar os nós
-    for (let i = 0; i < total; i++) {
-      const next = (i + 1) % total;
+    
+    // Conectar as habilidades
+    for (let i = 0; i < 50; i++) {
+      const next = (i + 1) % 50;
       connections.push([i, next]);
-      if (i % 5 === 0 && i + 5 < total) connections.push([i, i + 5]);
+      if (i % 5 === 0 && i + 5 < 50) connections.push([i, i + 5]);
       nodes[i].children.push(next);
     }
 
-    // Renderizar conexões
+    // Renderizar as conexões
     connections.forEach(([from, to]) => {
       const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
       line.setAttribute("x1", nodes[from].x);
@@ -135,17 +150,18 @@
       svg.appendChild(line);
     });
 
-    // Renderizar nós
+    // Renderizar os nós (habilidades)
     nodes.forEach((node) => {
       const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
       circle.setAttribute("cx", node.x);
       circle.setAttribute("cy", node.y);
       circle.setAttribute("r", 20);
-      circle.setAttribute("class", "node" + (node.active ? ' active' : ''));
-
+      circle.setAttribute("class", "node");
+      circle.setAttribute("id", `node-${node.id}`);
+      
       // Tooltip
       circle.addEventListener('mousemove', (e) => {
-        tooltip.innerHTML = `<strong>${node.name}</strong><br>${node.description}<br>${node.level}/${node.max}`;
+        tooltip.innerHTML = `<strong>${node.name}</strong><br>${node.description}<br>${node.level}/${node.maxLevel}`;
         tooltip.style.left = e.pageX + 10 + 'px';
         tooltip.style.top = e.pageY + 10 + 'px';
         tooltip.style.display = 'block';
@@ -154,41 +170,76 @@
         tooltip.style.display = 'none';
       });
 
-      // Clicar para ativar e mostrar o botão de pontos
+      // Click para mostrar atributos e o botão de "Upar"
       circle.addEventListener('click', () => {
-        if (!node.active || node.level >= node.max) return;
-        node.level++;
-        if (node.level === node.max) {
-          node.children.forEach(cid => {
-            nodes[cid].active = true;
-            document.getElementById(`node-${cid}`).classList.add('active');
-          });
+        if (node.level < node.maxLevel && node.unlocked) {
+          currentSkill = node;
+          wordInput.style.visibility = 'visible';
+          wordField.focus();
         }
-        document.getElementById(`node-${node.id}`).classList.add('active');
-        wordInput.style.visibility = 'visible';
-        wordField.focus();
-        wordField.value = '';
       });
 
-      circle.setAttribute("id", `node-${node.id}`);
       svg.appendChild(circle);
     });
 
-    // Verificação da palavra e atribuição de pontos
+    // Gerar uma palavra aleatória
+    function generateRandomWord(index) {
+      const words = ['Sapo', 'Abacaxi', 'Magia', 'Cavalo', 'Dragão', 'Floresta', 'Resistência', 'Fúria', 'Força', 'Cura'];
+      return words[index % words.length];
+    }
+
+    // Submeter a palavra
     submitWord.addEventListener('click', () => {
       const word = wordField.value;
-      const node = nodes.find(n => n.active);
-
-      if (word === node.word) {
-        node.points++;
-        wordField.value = '';
-        if (node.points === 7) {
-          alert(`Habilidade ${node.name} desbloqueada com sucesso!`);
+      if (word === currentSkill.word) {
+        currentSkill.level++;
+        if (currentSkill.level === currentSkill.maxLevel) {
+          currentSkill.unlocked = true;
         }
         wordInput.style.visibility = 'hidden';
+        alert(`Habilidade ${currentSkill.name} upada com sucesso!`);
       } else {
-        alert('Palavra incorreta, tente novamente!');
+        alert('Palavra incorreta. Tente novamente!');
       }
+      wordField.value = '';
+    });
+
+    // Iniciar o jogo de palavras
+    function startWordGame() {
+      gameContainer.style.display = 'block';
+      const phrase = `Complete a palavra: ${currentSkill.word}`;
+      gameQuestion.innerHTML = phrase;
+      startTimer();
+    }
+
+    // Timer de 5 minutos
+    function startTimer() {
+      interval = setInterval(() => {
+        if (remainingTime <= 0) {
+          clearInterval(interval);
+          alert('Tempo esgotado! A palavra não foi completada.');
+          gameContainer.style.display = 'none';
+        } else {
+          const minutes = Math.floor(remainingTime / 60);
+          const seconds = remainingTime % 60;
+          timerDisplay.innerHTML = `Tempo: ${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+          remainingTime--;
+        }
+      }, 1000);
+    }
+
+    // Responder a palavra
+    submitAnswer.addEventListener('click', () => {
+      const answer = answerField.value;
+      if (answer === currentSkill.word) {
+        alert('Palavra correta!');
+        gameContainer.style.display = 'none';
+        currentSkill.level++;
+        remainingTime = 300; // Resetar o tempo
+      } else {
+        alert('Palavra incorreta! Tente novamente.');
+      }
+      answerField.value = '';
     });
   </script>
 </body>
