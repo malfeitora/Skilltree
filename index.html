@@ -1,105 +1,134 @@
+/* Skill Tree Inspirada em Path of Exile HTML + CSS + JavaScript (SVG) Sistema interativo com 30 habilidades conectadas, atributos ao clicar e visual dark */
+
 <!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Skill Tree do Cavaleiro</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Árvore de Habilidades Sombria</title>
   <style>
     body {
-      background-color: #0f0f0f;
-      color: #eee;
+      margin: 0;
+      background: #0b0b0b;
+      overflow: hidden;
       font-family: 'Segoe UI', sans-serif;
-      display: flex;
-      justify-content: center;
-      padding: 2rem;
     }
-    .tree {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      width: 100%;
-      max-width: 800px;
+    svg {
+      width: 100vw;
+      height: 100vh;
+      display: block;
     }
-    .skill-group {
-      background-color: #1c1c1c;
-      border: 1px solid #444;
-      border-radius: 10px;
-      padding: 1rem;
+    .node {
+      fill: #222;
+      stroke: #999;
+      stroke-width: 2;
+      cursor: pointer;
+      transition: 0.2s;
     }
-    .skill-group h2 {
-      margin-top: 0;
-      color: #88c0d0;
+    .node.active {
+      fill: #4caf50;
+      stroke: #fff;
     }
-    .skill {
-      margin: 0.5rem 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .skill label {
-      flex: 1;
-    }
-    .skill input[type="range"] {
-      width: 100px;
-    }
-    .skill input:disabled {
-      opacity: 0.5;
+    .tooltip {
+      position: absolute;
+      background: #1b1b1b;
+      color: #eee;
+      padding: 8px 12px;
+      border-radius: 5px;
+      font-size: 14px;
+      pointer-events: none;
+      display: none;
+      white-space: nowrap;
+      border: 1px solid #4caf50;
     }
   </style>
 </head>
 <body>
-  <div class="tree" id="skillTree">
-    <div class="skill-group">
-      <h2>Defesa Elemental</h2>
-      <div class="skill"><label>Resistência a Fogo</label><input type="range" min="0" max="7" value="0" data-index="0"></div>
-      <div class="skill"><label>Resistência a Gelo</label><input type="range" min="0" max="7" value="0" data-index="1" disabled></div>
-      <div class="skill"><label>Resistência a Raio</label><input type="range" min="0" max="7" value="0" data-index="2" disabled></div>
-    </div>
-    <div class="skill-group">
-      <h2>Resistência Física</h2>
-      <div class="skill"><label>Resistência a Veneno</label><input type="range" min="0" max="7" value="0" data-index="3"></div>
-      <div class="skill"><label>Resistência a Sangramento</label><input type="range" min="0" max="7" value="0" data-index="4" disabled></div>
-      <div class="skill"><label>Resistência a Maldição</label><input type="range" min="0" max="7" value="0" data-index="5" disabled></div>
-    </div>
-    <div class="skill-group">
-      <h2>Magia Sombria</h2>
-      <div class="skill"><label>Dano Mágico Sombrio</label><input type="range" min="0" max="7" value="0" data-index="6"></div>
-      <div class="skill"><label>Amplificar Magia Negra</label><input type="range" min="0" max="7" value="0" data-index="7" disabled></div>
-      <div class="skill"><label>Roubo de Vida Mágico</label><input type="range" min="0" max="7" value="0" data-index="8" disabled></div>
-    </div>
-    <div class="skill-group">
-      <h2>Armas e Precisão</h2>
-      <div class="skill"><label>Maestria com Lança</label><input type="range" min="0" max="7" value="0" data-index="9"></div>
-      <div class="skill"><label>Crítico com Armas de Alcance</label><input type="range" min="0" max="7" value="0" data-index="10" disabled></div>
-      <div class="skill"><label>Perfuração Mágica</label><input type="range" min="0" max="7" value="0" data-index="11" disabled></div>
-    </div>
-    <div class="skill-group">
-      <h2>Especializações</h2>
-      <div class="skill"><label>Escudo Sombrio</label><input type="range" min="0" max="7" value="0" data-index="12"></div>
-      <div class="skill"><label>Barreira Etérea</label><input type="range" min="0" max="7" value="0" data-index="13" disabled></div>
-      <div class="skill"><label>Evocação das Sombras</label><input type="range" min="0" max="7" value="0" data-index="14" disabled></div>
-    </div>
-    <div class="skill-group">
-      <h2>Passivas</h2>
-      <div class="skill"><label>Recuperação Acelerada</label><input type="range" min="0" max="7" value="0" data-index="15"></div>
-      <div class="skill"><label>Aura Intimidante</label><input type="range" min="0" max="7" value="0" data-index="16" disabled></div>
-      <div class="skill"><label>Instinto de Sobrevivência</label><input type="range" min="0" max="7" value="0" data-index="17" disabled></div>
-    </div>
-  </div>  <script>
-    const inputs = document.querySelectorAll('input[type="range"]');
+  <svg id="skillTree"></svg>
+  <div id="tooltip" class="tooltip"></div>  <script>
+    const svg = document.getElementById('skillTree');
+    const tooltip = document.getElementById('tooltip');
 
-    inputs.forEach((input, i) => {
-      input.addEventListener('input', () => {
-        const current = parseInt(input.value);
-        if (current === 7) {
-          const next = document.querySelector(`input[data-index='${i + 1}']`);
-          if (next) next.disabled = false;
-        } else {
-          for (let j = i + 1; j < inputs.length; j++) {
-            inputs[j].disabled = true;
-            inputs[j].value = 0;
-          }
-        }
+    const nodes = [];
+    const connections = [];
+
+    // Gerar 30 nós conectados aleatoriamente em um estilo circular
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const radius = 300;
+    const total = 30;
+
+    for (let i = 0; i < total; i++) {
+      const angle = (2 * Math.PI * i) / total;
+      const x = centerX + radius * Math.cos(angle);
+      const y = centerY + radius * Math.sin(angle);
+      const node = {
+        id: i,
+        name: `Habilidade ${i + 1}`,
+        description: `Atributos da habilidade ${i + 1}`,
+        x,
+        y,
+        active: i === 0, // Só a primeira é ativa
+        level: 0,
+        max: 7,
+        children: [],
+      };
+      nodes.push(node);
+    }
+
+    // Conectar cada nó ao próximo (em anel) + 1 conexão extra para diversidade
+    for (let i = 0; i < total; i++) {
+      const next = (i + 1) % total;
+      connections.push([i, next]);
+      if (i % 5 === 0 && i + 5 < total) connections.push([i, i + 5]);
+      nodes[i].children.push(next);
+    }
+
+    // Renderizar conexões
+    connections.forEach(([from, to]) => {
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("x1", nodes[from].x);
+      line.setAttribute("y1", nodes[from].y);
+      line.setAttribute("x2", nodes[to].x);
+      line.setAttribute("y2", nodes[to].y);
+      line.setAttribute("stroke", "#444");
+      line.setAttribute("stroke-width", "2");
+      svg.appendChild(line);
+    });
+
+    // Renderizar nós
+    nodes.forEach((node) => {
+      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circle.setAttribute("cx", node.x);
+      circle.setAttribute("cy", node.y);
+      circle.setAttribute("r", 20);
+      circle.setAttribute("class", "node" + (node.active ? ' active' : ''));
+
+      // Tooltip
+      circle.addEventListener('mousemove', (e) => {
+        tooltip.innerHTML = `<strong>${node.name}</strong><br>${node.description}<br>${node.level}/${node.max}`;
+        tooltip.style.left = e.pageX + 10 + 'px';
+        tooltip.style.top = e.pageY + 10 + 'px';
+        tooltip.style.display = 'block';
       });
+      circle.addEventListener('mouseleave', () => {
+        tooltip.style.display = 'none';
+      });
+
+      // Clicar para aumentar nível
+      circle.addEventListener('click', () => {
+        if (!node.active || node.level >= node.max) return;
+        node.level++;
+        if (node.level === node.max) {
+          node.children.forEach(cid => {
+            nodes[cid].active = true;
+            document.getElementById(`node-${cid}`).classList.add('active');
+          });
+        }
+        circle.innerHTML = `${node.level}/${node.max}`;
+      });
+
+      circle.setAttribute("id", `node-${node.id}`);
+      svg.appendChild(circle);
     });
   </script></body>
 </html>
