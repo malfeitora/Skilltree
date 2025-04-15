@@ -1,10 +1,9 @@
-/* Árvore de Habilidades com Sistema de Pontos baseado em Palavras-chave HTML + CSS + JavaScript (SVG) Sistema com 50 habilidades, palavras-chave para adicionar pontos, com dificuldade crescente. */
-
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Árvore de Habilidades Sombria - Sistema de Pontos</title>
+  <title>Árvore de Habilidades - Sistema de Pontos</title>
   <style>
     body {
       margin: 0;
@@ -71,7 +70,9 @@
   <div id="wordInput" class="input-container" style="position: absolute; visibility: hidden;">
     <input type="text" id="word" class="input-field" placeholder="Digite a palavra..." />
     <button id="submitWord" class="button">Enviar Palavra</button>
-  </div>  <script>
+  </div>
+
+  <script>
     const svg = document.getElementById('skillTree');
     const tooltip = document.getElementById('tooltip');
     const wordInput = document.getElementById('wordInput');
@@ -84,7 +85,8 @@
     const words = [
       'Sapo', 'S_p_', 'Abacaxi', 'Floresta', 'Cavalo', 'Mago', 'Dragão', 'Força', 'Escudo', 'Magia',
       'Cura', 'Fúria', 'Terra', 'Vento', 'Água', 'Luz', 'Escuridão', 'Céu', 'Montanha', 'Espada',
-      'Fogo', 'Ouro', 'Cristal', 'Relâmpago', 'Vingança', 'Coragem', 'Tempestade', 'Sabedoria', 'Guerra', 'Rei'
+      'Fogo', 'Ouro', 'Cristal', 'Relâmpago', 'Vingança', 'Coragem', 'Tempestade', 'Sabedoria', 'Guerra', 'Rei',
+      'Mistério', 'Luz_r_', 'Nevoa', 'Raiva', 'Resistência', 'Concentração', 'Ilusão', 'Invocação', 'Imortal', 'Aura'
     ];
 
     const centerX = window.innerWidth / 2;
@@ -188,5 +190,6 @@
         alert('Palavra incorreta, tente novamente!');
       }
     });
-  </script></body>
+  </script>
+</body>
 </html>
